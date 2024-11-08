@@ -1,0 +1,26 @@
+{
+  "name": "my-electron-app",
+  "version": "1.0.0",
+  "description": "\"PIA MN EQUIPO1\"",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LCRMTZ/MN-PIA.git"
+  },
+  "keywords": [
+    "CODE"
+  ],
+  "author": "EQUIPO 1",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LCRMTZ/MN-PIA/issues"
+  },
+  "homepage": "https://github.com/LCRMTZ/MN-PIA#readme",
+  "devDependencies": {
+    "electron": "^33.2.0"
+  }
+}
