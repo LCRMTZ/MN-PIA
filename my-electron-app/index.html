@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación de Métodos Numéricos</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <h1>Comparación de Métodos Numéricos</h1>
+
+    <div id="app">
+        <label for="method-type">Elige el tipo de método:</label>
+        <select id="method-type">
+            <option value="interpolation">Interpolación</option>
+            <option value="linear-equations">Ecuaciones Lineales</option>
+            <option value="nonlinear-equations">Ecuaciones No Lineales</option>
+        </select>
+
+        <label for="method1">Elige el primer método:</label>
+        <select id="method1">
+            <option value="newton-forward">Newton hacia adelante</option>
+        </select>
+
+        <label for="method2">Elige el segundo método:</label>
+        <select id="method2">
+            <option value="newton-backward">Newton hacia atrás</option>
+        </select>
+
+        <label for="x-value">Ingresa el valor de x:</label>
+        <input type="number" id="x-value">
+        <button id="compare-button">Comparar Métodos</button>
+
+        <div id="results">
+            <h2>Resultados:</h2>
+            <p id="output"></p>
+        </div>
+
+        <!-- Contenedor para animación de comparación de iteraciones -->
+        <div id="iteration-progress">
+            <div id="method1-progress" class="method-progress"></div>
+            <div id="method2-progress" class="method-progress"></div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+    <script src="frameworks/math.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#app {
+    width: 60%;
+    max-width: 600px;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+/* Estilos de las barras de animación */
+#animation {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.bar {
+    width: 0;
+    height: 20px;
+    background-color: #4CAF50;
+    transition: width 0.5s ease-out;
+}
+
+#bar1 {
+    background-color: #4CAF50; /* Color verde para el método 1 */
+}
+
+#bar2 {
+    background-color: #2196F3; /* Color azul para el método 2 */
+}
+
+#iteration-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.method-progress {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.method-progress .dot {
+    width: 15px;
+    height: 15px;
+    background-color: #ddd;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+#method1-progress .dot.active {
+    background-color: #4CAF50; /* Color verde para el método 1 */
+}
+
+#method2-progress .dot.active {
+    background-color: #2196F3; /* Color azul para el método 2 */
+}
