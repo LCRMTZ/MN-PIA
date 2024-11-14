@@ -1,7 +1,40 @@
+document.getElementById('generate-fields-button').addEventListener('click', () => {
+    const nFxValues = parseInt(document.getElementById('n-fx-values').value);
+    const nXValues = parseInt(document.getElementById('n-x-values').value);
+    let fxText = "";
+    let xText = "";
+
+    if (isNaN(nFxValues) || nFxValues <= 0) {
+        document.getElementById('funciones').innerHTML = "<p>Error: Ingresa un número válido para los valores fx.</p>";
+        return;
+    }
+
+    if (isNaN(nXValues) || nXValues <= 0) {
+        document.getElementById('funciones').innerHTML = "<p>Error: Ingresa un número válido para los valores x.</p>";
+        return;
+    }
+
+    // Generar campos para fx
+    fxText += "<h3>Valores de fx:</h3>";
+    for (let i = 1; i <= nFxValues; i++) {
+        fxText += `<p>fx ${i}:</p><input type="number" id="fx-value-${i}" required><br>`;
+    }
+
+    // Generar campos para x
+    xText += "<h3>Valores de x:</h3>";
+    for (let i = 1; i <= nXValues; i++) {
+        xText += `<p>x ${i}:</p><input type="number" id="x-value-${i}" required><br>`;
+    }
+
+    document.getElementById("funciones").innerHTML = fxText + xText;
+});
+
 document.getElementById('compare-button').addEventListener('click', () => {
     const method1 = document.getElementById('method1').value;
     const method2 = document.getElementById('method2').value;
-    const xValue = parseFloat(document.getElementById('x-value').value);
+
+    // Obtener el valor de x para la comparación
+    const xValue = parseFloat(document.getElementById('x-value-1').value);
 
     if (method1 === method2) {
         document.getElementById('output').textContent = "Por favor, elige dos métodos diferentes para comparar.";
