@@ -1,106 +1,145 @@
-document.getElementById('generate-fields-button').addEventListener('click', () => {
-    const nFxValues = parseInt(document.getElementById('n-fx-values').value);
-    const nXValues = parseInt(document.getElementById('n-x-values').value);
-    let fxText = "";
-    let xText = "";
+const methodOptions = {
+    interpolation: [
+        { value: "lagrange", text: "Lagrange" },
+        { value: "newton-divided", text: "Newton con Diferencias Divididas" },
+        { value: "newton-forward", text: "Newton hacia Adelante" },
+        { value: "newton-backward", text: "Newton hacia Atrás" }
+    ],
+    "linear-equations": [
+        { value: "montante", text: "Montante" },
+        { value: "gauss-seidel", text: "Gauss-Seidel" },
+        { value: "gauss-jordan", text: "Gauss-Jordan" },
+        { value: "jacobi", text: "Jacobi" },
+        { value: "eliminacion-gaussiana", text: "Eliminación Gaussiana" }
+    ],
+    "nonlinear-equations": [
+        { value: "bisection", text: "Bisección" },
+        { value: "falsa-posicion", text: "Falsa Posición" },
+        { value: "newton-raphson", text: "Newton-Raphson" },
+        { value: "punto-fijo", text: "Punto Fijo" },
+        { value: "secante", text: "Secante" }
+    ],
+    "differential-equations": [
+        { value: "euler-modificado", text: "Euler Modificado" },
+        { value: "segundo-orden", text: "2do Orden" },
+        { value: "tercer-orden", text: "3er Orden" },
+        { value: "runge-kutta", text: "Runge-Kutta" }
+    ],
+    integration: [
+        { value: "trapezoidal", text: "Regla Trapezoidal (RTMN)" },
+        { value: "simpson-1-3", text: "1/3 de Simpson" },
+        { value: "simpson-3-8", text: "3/8 de Simpson" },
+        { value: "newton-cotes-cerradas", text: "Newton-Cotes Cerradas" }
+    ],
+    "minimos-cuadrados": [
+        { value: "lineal", text: "Mínimos Cuadrados Lineal" },
+        { value: "cuadratica", text: "Mínimos Cuadrados Cuadrática" },
+        { value: "cubica", text: "Mínimos Cuadrados Cúbica" },
+        { value: "linea-recta", text: "Línea Recta" }
+    ]
+};
 
-    if (isNaN(nFxValues) || nFxValues <= 0) {
-        document.getElementById('funciones').innerHTML = "<p>Error: Ingresa un número válido para los valores fx.</p>";
-        return;
-    }
+const methodTypeSelect = document.getElementById("method-type");
+const method1Select = document.getElementById("method1");
+const method2Select = document.getElementById("method2");
 
-    if (isNaN(nXValues) || nXValues <= 0) {
-        document.getElementById('funciones').innerHTML = "<p>Error: Ingresa un número válido para los valores x.</p>";
-        return;
-    }
+function populateMethodOptions() {
+    const selectedType = methodTypeSelect.value;
+    const options = methodOptions[selectedType] || [];
 
-    // Generar campos para fx
-    fxText += "<h3>Valores de fx:</h3>";
-    for (let i = 1; i <= nFxValues; i++) {
-        fxText += `<p>fx ${i}:</p><input type="number" id="fx-value-${i}" required><br>`;
-    }
+    method1Select.innerHTML = "";
+    method2Select.innerHTML = "";
 
-    // Generar campos para x
-    xText += "<h3>Valores de x:</h3>";
-    for (let i = 1; i <= nXValues; i++) {
-        xText += `<p>x ${i}:</p><input type="number" id="x-value-${i}" required><br>`;
-    }
+    options.forEach(option => {
+        const optionElement1 = document.createElement("option");
+        optionElement1.value = option.value;
+        optionElement1.text = option.text;
+        method1Select.add(optionElement1);
 
-    document.getElementById("funciones").innerHTML = fxText + xText;
+        const optionElement2 = document.createElement("option");
+        optionElement2.value = option.value;
+        optionElement2.text = option.text;
+        method2Select.add(optionElement2);
+    });
+}
+
+methodTypeSelect.addEventListener("change", () => {
+    populateMethodOptions();
+    document.getElementById("output").textContent = ""; // Borra resultados previos
+    document.getElementById("iteration-progress").innerHTML = ""; // Borra animaciones previas
 });
 
-document.getElementById('compare-button').addEventListener('click', () => {
-    const method1 = document.getElementById('method1').value;
-    const method2 = document.getElementById('method2').value;
+populateMethodOptions(); // Inicializar con el primer tipo de método
 
-    // Obtener el valor de x para la comparación
-    const xValue = parseFloat(document.getElementById('x-value-1').value);
+// Función para validar los datos de entrada de x y y
+function validateInterpolationData(xData, yData) {
+    const x = xData.split(',').map(Number);
+    const y = yData.split(',').map(Number);
 
-    if (method1 === method2) {
-        document.getElementById('output').textContent = "Por favor, elige dos métodos diferentes para comparar.";
-        return;
+    if (x.includes(NaN) || y.includes(NaN)) {
+        return false;
     }
 
-    Promise.all([
-        import(`./methods/${method1}.js`),
-        import(`./methods/${method2}.js`)
-    ]).then(([module1, module2]) => {
-        const { calculateMethod: calculateMethod1 } = module1;
-        const { calculateMethod: calculateMethod2 } = module2;
+    if (x.length !== y.length) {
+        return false;
+    }
 
-        // Obtener el resultado y el número de iteraciones
-        const result1 = calculateMethod1(xValue);
-        const result2 = calculateMethod2(xValue);
+    return true;
+}
 
-        // Mostrar resultados numéricos
+// Comparación de métodos
+document.getElementById('compare-button').addEventListener('click', async () => {
+    try {
+        const method1 = document.getElementById('method1').value;
+        const method2 = document.getElementById('method2').value;
+        const xValue = parseFloat(document.getElementById('x-value').value);
+        const xData = document.getElementById('x-data').value;
+        const yData = document.getElementById('y-data').value;
+
+        if (isNaN(xValue)) {
+            document.getElementById('output').textContent = "Por favor, ingresa un valor válido para x.";
+            return;
+        }
+
+        if (!validateInterpolationData(xData, yData)) {
+            document.getElementById('output').textContent = "Por favor, ingresa puntos válidos para x y y.";
+            return;
+        }
+
+        const xValues = xData.split(',').map(Number);
+        const yValues = yData.split(',').map(Number);
+
+        if (method1 === method2) {
+            document.getElementById('output').textContent = "Por favor, elige dos métodos diferentes para comparar.";
+            return;
+        }
+
+        const [module1, module2] = await Promise.all([
+            import(`./methods/${method1}.js`),
+            import(`./methods/${method2}.js`)
+        ]);
+
+        const result1 = module1.calculateMethod(xValue, xValues, yValues);
+        const result2 = module2.calculateMethod(xValue, xValues, yValues);
+
         document.getElementById('output').innerHTML = `
             <p><strong>${method1}:</strong> Resultado: ${result1.value}, Iteraciones: ${result1.iterations}</p>
             <p><strong>${method2}:</strong> Resultado: ${result2.value}, Iteraciones: ${result2.iterations}</p>
             <p><strong>Comparación:</strong> ${result1.iterations < result2.iterations ? method1 : method2} fue más rápido en cuanto a iteraciones.</p>
         `;
 
-        // Crear animación de progreso de iteraciones
         animateIterations(result1.iterations, result2.iterations);
-    }).catch(error => {
-        console.error("Error al cargar los métodos:", error);
-        document.getElementById('output').textContent = "Error al cargar los métodos. Verifique los archivos de métodos.";
-    });
+    } catch (error) {
+        console.error(error);
+        document.getElementById('output').textContent = "Hubo un error al realizar la comparación.";
+    }
 });
 
-function animateIterations(iterations1, iterations2) {
+// Función para animar el progreso de las iteraciones
+function animateIterations(iter1, iter2) {
     const method1Progress = document.getElementById('method1-progress');
     const method2Progress = document.getElementById('method2-progress');
-
-    // Limpiar cualquier punto de progreso previo
-    method1Progress.innerHTML = '';
-    method2Progress.innerHTML = '';
-
-    // Crear puntos de progreso para cada método según la cantidad de iteraciones
-    for (let i = 0; i < Math.max(iterations1, iterations2); i++) {
-        const dot1 = document.createElement('div');
-        dot1.classList.add('dot');
-        method1Progress.appendChild(dot1);
-
-        const dot2 = document.createElement('div');
-        dot2.classList.add('dot');
-        method2Progress.appendChild(dot2);
-    }
-
-    // Animar el progreso de las iteraciones
-    let currentIteration = 0;
-    const interval = setInterval(() => {
-        if (currentIteration < iterations1) {
-            method1Progress.children[currentIteration].classList.add('active');
-        }
-        if (currentIteration < iterations2) {
-            method2Progress.children[currentIteration].classList.add('active');
-        }
-
-        currentIteration++;
-
-        // Finalizar la animación cuando se alcanza el máximo de iteraciones de ambos métodos
-        if (currentIteration >= Math.max(iterations1, iterations2)) {
-            clearInterval(interval);
-        }
-    }, 500); // Ajusta el intervalo para la velocidad de animación
+    
+    method1Progress.style.width = `${(iter1 * 100) / Math.max(iter1, iter2)}%`;
+    method2Progress.style.width = `${(iter2 * 100) / Math.max(iter1, iter2)}%`;
 }

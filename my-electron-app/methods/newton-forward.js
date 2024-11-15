@@ -1,18 +1,26 @@
-export function calculateMethod(x) {
-    // Datos de ejemplo y cálculo simple
-    const xValues = [1.7, 2.4, 3.1];
-    const yValues = [0.35, 0.87, 1.03];
+// newton-divided.js
+export function calculateMethod(xValue, xData, yData) {
+    let iterations = 0;
+    const n = xData.length;
+    let result = yData[0];
+    let diff = [...yData]; // Copia de los valores yData para las diferencias divididas
 
-    let iterations = 0; // Contador de iteraciones
-    const h = xValues[1] - xValues[0];
-    const s = (x - xValues[0]) / h;
+    // Calcular las diferencias divididas
+    for (let i = 1; i < n; i++) {
+        for (let j = n - 1; j >= i; j--) {
+            diff[j] = (diff[j] - diff[j - 1]) / (xData[j] - xData[j - i]);
+        }
+    }
 
-    const deltaY1 = yValues[1] - yValues[0];
-    const deltaY2 = yValues[2] - yValues[1];
-    const delta2Y0 = deltaY2 - deltaY1;
-
-    const result = yValues[0] + s * deltaY1 + (s * (s - 1) * delta2Y0) / 2;
-    iterations += 3; // Ejemplo de conteo de iteraciones
+    // Usar las diferencias divididas para interpolar
+    for (let i = 1; i < n; i++) {
+        let term = diff[i];
+        for (let j = 0; j < i; j++) {
+            term *= (xValue - xData[j]);
+        }
+        result += term;
+        iterations++;
+    }
 
     return { value: result, iterations };
 }

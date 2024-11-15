@@ -15,26 +15,26 @@
             <option value="interpolation">Interpolación</option>
             <option value="linear-equations">Ecuaciones Lineales</option>
             <option value="nonlinear-equations">Ecuaciones No Lineales</option>
+            <option value="differential-equations">Ecuaciones Diferenciales Ordinarias (EDO)</option>
+            <option value="integration">Integración</option>
+            <option value="minimos-cuadrados">Mínimos Cuadrados</option>
         </select>
 
         <label for="method1">Elige el primer método:</label>
-        <select id="method1">
-            <option value="newton-forward">Newton hacia adelante</option>
-        </select>
+        <select id="method1"></select>
 
         <label for="method2">Elige el segundo método:</label>
-        <select id="method2">
-            <option value="newton-backward">Newton hacia atrás</option>
-        </select>
+        <select id="method2"></select>
 
-        <label for="n-fx-values">Ingresa el número de valores fx:</label>
-        <input type="number" id="n-fx-values">
+        <label for="x-value">Ingresa el valor de x:</label>
+        <input type="number" id="x-value">
 
-        <label for="n-x-values">Ingresa el número de valores x:</label>
-        <input type="number" id="n-x-values">
+        <!-- Campos para ingresar puntos x y y -->
+        <label for="x-data">Ingresa los puntos x (separados por coma):</label>
+        <input type="text" id="x-data">
 
-        <button id="generate-fields-button">Generar Campos</button>
-        <div id="funciones"></div>
+        <label for="y-data">Ingresa los puntos y (separados por coma):</label>
+        <input type="text" id="y-data">
 
         <button id="compare-button">Comparar Métodos</button>
 
@@ -43,7 +43,6 @@
             <p id="output"></p>
         </div>
 
-        <!-- Contenedor para animación de comparación de iteraciones -->
         <div id="iteration-progress">
             <div id="method1-progress" class="method-progress"></div>
             <div id="method2-progress" class="method-progress"></div>
@@ -52,6 +51,5 @@
 
     <script src="renderer.js"></script>
     <script src="frameworks/math.min.js"></script>
-
 </body>
 </html>
