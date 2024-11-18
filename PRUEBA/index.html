@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpolacion y Comparacion</title>
+</head>
+<body>
+    <h1>Interpolacion y Comparacion</h1>
+    <form action="/process" method="post">
+        <label for="x_values">Valores de X (separados por comas):</label><br>
+        <input type="text" id="x_values" name="x_values" placeholder="Ej: 1,2,3,4"><br><br>
+        <label for="y_values">Valores de Y (separados por comas):</label><br>
+        <input type="text" id="y_values" name="y_values" placeholder="Ej: 10,20,30,40"><br><br>
+        <label for="test_value">Valor de prueba para interpolar:</label><br>
+        <input type="text" id="test_value" name="test_value" placeholder="Ej: 2.5"><br><br>
+        <label for="method_1">Metodo 1:</label>
+        <select id="method_1" name="method_1">
+            <option value="lineal">Interpolacion Lineal</option>
+            <option value="lagrange">Lagrange</option>
+            <option value="newton_adelante">Newton Adelante</option>
+            <option value="newton_atras">Newton Atras</option>
+            <option value="newton_diferencias_divididas">Newton con diferencias divididas</option>
+        </select><br><br>
+        <label for="method_2">Metodo 2:</label>
+        <select id="method_2" name="method_2">
+            <option value="lineal">Interpolacion Lineal</option>
+            <option value="lagrange">Lagrange</option>
+            <option value="newton_adelante">Newton Adelante</option>
+            <option value="newton_atras">Newton Atras</option>
+            <option value="newton_diferencias_divididas">Newton con diferencias divididas</option>
+        </select><br><br>
+        <button type="submit">Calcular</button>
+    </form>
+</body>
+</html>
