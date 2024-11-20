@@ -12,19 +12,70 @@ def intervalos_uniformes(valores):
 
 
 # Interpolación Lineal
+# def interpolacion_lineal(x, y, valor):
+#     for i in range(len(x) - 1):
+#         if x[i] <= valor <= x[i+1]:
+#             return y[i] + (y[i+1] - y[i]) * (valor - x[i]) / (x[i+1] - x[i])
+#     return None
 def interpolacion_lineal(x, y, valor):
-    for i in range(len(x) - 1):
-        if x[i] <= valor <= x[i+1]:
-            return y[i] + (y[i+1] - y[i]) * (valor - x[i]) / (x[i+1] - x[i])
+    # Validar que x y y tienen más de un valor
+    if len(x) <= 1 or len(y) <= 1:
+        raise ValueError("x e y deben contener más de un valor cada uno.")
+    
+    # Validar que x e y tienen la misma cantidad de valores
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma cantidad de valores.")
+    
+    # Validar que x no tiene valores repetidos
+    if len(set(x)) != len(x):
+        raise ValueError("x no debe contener valores repetidos.")
+    
+    # Convertir a una lista de coordenadas y ordenar por x
+    coordenadas = sorted(zip(x, y), key=lambda punto: punto[0])
+    
+    # Separar nuevamente las listas x e y ordenadas
+    x_ordenado, y_ordenado = zip(*coordenadas)
+    
+    # Realizar interpolación lineal
+    for i in range(len(x_ordenado) - 1):
+        if x_ordenado[i] <= valor <= x_ordenado[i+1]:
+            return y_ordenado[i] + (y_ordenado[i+1] - y_ordenado[i]) * (valor - x_ordenado[i]) / (x_ordenado[i+1] - x_ordenado[i])
+    
+    # Si no se encuentra el intervalo, retornar None
     return None
+
 
 # Interpolación de Lagrange
 def interpolacion_lagrange(x, y, valor):
+    # Validar que x y y tienen más de un valor
+    if len(x) <= 1 or len(y) <= 1:
+        raise ValueError("x e y deben contener más de un valor cada uno.")
+    
+    # Validar que x e y tienen la misma cantidad de valores
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma cantidad de valores.")
+    
+    # Validar que x no tiene valores repetidos
+    if len(set(x)) != len(x):
+        raise ValueError("x no debe contener valores repetidos.")
+    
     polinomio = lagrange(x, y)
     return polinomio(valor)
 
 # Newton Adelante
 def newton_adelante(x, y, valor):
+    # Validar que x y y tienen más de un valor
+    if len(x) <= 1 or len(y) <= 1:
+        raise ValueError("x e y deben contener más de un valor cada uno.")
+    
+    # Validar que x e y tienen la misma cantidad de valores
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma cantidad de valores.")
+    
+    # Validar que x no tiene valores repetidos
+    if len(set(x)) != len(x):
+        raise ValueError("x no debe contener valores repetidos.")
+    
     n = len(x)
     diferencias = [y[:]]
     for i in range(1, n):
@@ -41,6 +92,18 @@ def newton_adelante(x, y, valor):
 
 # Newton Atrás
 def newton_atras(x, y, valor):
+    # Validar que x y y tienen más de un valor
+    if len(x) <= 1 or len(y) <= 1:
+        raise ValueError("x e y deben contener más de un valor cada uno.")
+    
+    # Validar que x e y tienen la misma cantidad de valores
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma cantidad de valores.")
+    
+    # Validar que x no tiene valores repetidos
+    if len(set(x)) != len(x):
+        raise ValueError("x no debe contener valores repetidos.")
+    
     n = len(x)
     diferencias = [y[:]]
     for i in range(1, n):
@@ -56,11 +119,27 @@ def newton_atras(x, y, valor):
     return resultado
 
 def newton_diferencias_divididas(x, y, valor):
+    # Validar que x y y tienen más de un valor
+    if len(x) <= 1 or len(y) <= 1:
+        raise ValueError("x e y deben contener más de un valor cada uno.")
+    
+    # Validar que x e y tienen la misma cantidad de valores
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma cantidad de valores.")
+    
+    # Validar que x no tiene valores repetidos
+    if len(set(x)) != len(x):
+        raise ValueError("x no debe contener valores repetidos.")
+    
     n = len(x)
     # Verificar que haya suficientes puntos
     if n < 2:
         raise ValueError("Se necesitan al menos dos puntos para interpolar.")
     
+    diferencias = [x[i+1] - x[i] for i in range(len(x) - 1)]
+    if not all(diff == diferencias[0] for diff in diferencias):
+        raise ValueError("Los valores en x no están espaciados de forma uniforme.")
+
     # Inicializar tabla de diferencias divididas
     coeficientes = [y[:]]  # Copia inicial de los valores de y
     for i in range(1, n):
