@@ -451,8 +451,14 @@ metodo_no_lineal_var = tk.StringVar(value="Bisección")
 no_lineal_menu = tk.OptionMenu(root, metodo_no_lineal_var, "Bisectriz", "Newton-Raphson","Falsa-Posicion","Punto-Fijo","Secante")
 
 # Opciones de EDO
-metodo_EDO_var = tk.StringVar(value="Euler_Modificado")
-EDO_menu = tk.OptionMenu(root, metodo_EDO_var,"EulerModificado")
+metodo_EDO_var = tk.StringVar(value="Euler Modificado")
+EDO_menu = tk.OptionMenu(root, metodo_EDO_var,
+                         "Euler Modificado",
+                         "Runge-Kutta 2do Orden",
+                         "Runge-Kutta 3er Orden",
+                         "Runge-Kutta 4to Orden",
+                         "Runge-Kutta 3/8 Simpson",
+                         "Runge-Kutta 1/3 Simpson")
 
 #Opciones Integracion
 metodo_Integracion_var = tk.StringVar(value="N-Cotes")
