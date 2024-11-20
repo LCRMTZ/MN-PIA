@@ -209,6 +209,78 @@ def newton_raphson(f, df, x0, tol=1e-5, max_iter=100):
         x = x - fx / dfx
     return x
 
+#Metodos de EDO
+def runge_kutta_4(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        k1 = h * func(x, y)
+        k2 = h * func(x + h / 2, y + k1 / 2)
+        k3 = h * func(x + h / 2, y + k2 / 2)
+        k4 = h * func(x + h, y + k3)
+        y += (k1 + 2 * k2 + 2 * k3 + k4) / 6
+        x += h
+    return resultados
+
+def runge_kutta_3_8(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        k1 = h * func(x, y)
+        k2 = h * func(x + h / 3, y + k1 / 3)
+        k3 = h * func(x + 2 * h / 3, y - k1 / 3 + k2)
+        k4 = h * func(x + h, y + k1 - k2 + k3)
+        y += (k1 + 3 * k2 + 3 * k3 + k4) / 8
+        x += h
+    return resultados
+
+def runge_kutta_1_3(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        k1 = h * func(x, y)
+        k2 = h * func(x + h / 2, y + k1 / 2)
+        k3 = h * func(x + h, y - k1 + 2 * k2)
+        y += (k1 + 4 * k2 + k3) / 6
+        x += h
+    return resultados
+
+def runge_kutta_2(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        k1 = h * func(x, y)
+        k2 = h * func(x + h, y + k1)
+        y += (k1 + k2) / 2
+        x += h
+    return resultados
+
+def runge_kutta_3(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        k1 = h * func(x, y)
+        k2 = h * func(x + h / 2, y + k1 / 2)
+        k3 = h * func(x + h, y - k1 + 2 * k2)
+        y += (k1 + 4 * k2 + k3) / 6
+        x += h
+    return resultados
+
+def euler_modificado(func, x0, y0, x_final, h):
+    x, y = x0, y0
+    resultados = []
+    while x <= x_final:
+        resultados.append((x, y))
+        y_predict = y + h * func(x, y)
+        y = y + h / 2 * (func(x, y) + func(x + h, y_predict))
+        x += h
+    return resultados
+
 # Función de cálculo de interpolación o ecuación
 def calcular():
     try:
@@ -243,6 +315,30 @@ def calcular():
                 messagebox.showerror("Error", "Selecciona un método lineal válido.")
             
             messagebox.showinfo("Resultado", f"Solución del sistema: {resultado}")
+
+        elif metodo_var.get() == "EDO":
+            func_str = f_entry.get()
+            func = lambda x, y: eval(func_str)
+            x0 = float(x0_entry.get())
+            y0 = float(y0_entry.get())
+            x_final = float(x_final_entry.get())
+            h = float(h_entry.get())
+            if metodo_EDO_var.get() == "Euler Modificado":
+                resultado = euler_modificado(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Runge-Kutta 2do Orden":
+                resultado = runge_kutta_2(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Runge-Kutta 3er Orden":
+                resultado = runge_kutta_3(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Runge-Kutta 4to Orden":
+                resultado = runge_kutta_4(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Runge-Kutta 3/8 Simpson":
+                resultado = runge_kutta_3_8(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Runge-Kutta 1/3 Simpson":
+                resultado = runge_kutta_1_3(func, x0, y0, x_final, h)
+            else:
+              messagebox.showerror("Error", "Selecciona un método de EDO válido.")
+
+              messagebox.showinfo("Resultado", f"Resultados: {resultado}")
 
         elif metodo_var.get() == "no_lineal":
             func_str = f_entry.get()
@@ -315,9 +411,21 @@ def cambiar_menu(tipo):
         tk.Label(root, text="Valor inicial x0:").pack()
         x0_entry.pack()
     
-    elif tipo =="EDO":
+    elif tipo == "EDO":
         tk.Label(root, text="Selecciona el método de ecuaciones diferenciales:").pack()
         EDO_menu.pack()
+
+        # Campos para ingresar la función, valores iniciales y parámetros
+        tk.Label(root, text="Función f(x, y):").pack()
+        f_entry.pack()
+        tk.Label(root, text="Valor inicial x0:").pack()
+        x0_entry.pack()
+        tk.Label(root, text="Valor inicial y0:").pack()
+        y0_entry.pack()
+        tk.Label(root, text="Valor final x:").pack()
+        x_final_entry.pack()
+        tk.Label(root, text="Paso h:").pack()
+        h_entry.pack()
 
     elif tipo =="Integracion":
         tk.Label(root, text="Selecciona el método de integracion:").pack()
@@ -363,6 +471,11 @@ b_entry = tk.Entry(root)
 f_entry = tk.Entry(root)
 df_entry = tk.Entry(root)
 x0_entry = tk.Entry(root)
+f_entry = tk.Entry(root)
+x0_entry = tk.Entry(root)
+y0_entry = tk.Entry(root)
+x_final_entry = tk.Entry(root)
+h_entry = tk.Entry(root)
 calc_button = tk.Button(root, text="Calcular", command=calcular)
 
 # Iniciar la interfaz gráfica
