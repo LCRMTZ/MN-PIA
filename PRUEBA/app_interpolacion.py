@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import numpy as np
 from scipy.interpolate import lagrange
+import sympy as sp
 
 # Verificar si los intervalos son uniformes
 def intervalos_uniformes(valores):
@@ -185,68 +186,200 @@ def gauss_eliminacion(A, b):
         x[i] = (augmented_matrix[i, -1] - np.dot(augmented_matrix[i, i + 1:n], x[i + 1:])) / augmented_matrix[i, i]
     return x
 
+def Montante(A, b):
+    # Convertimos A y b en matrices flotantes para operaciones
+    A = np.array(A, dtype=float)
+    b = np.array(b, dtype=float).reshape(-1, 1)
+    
+    # Construimos la matriz ampliada
+    Augmented = np.hstack((A, b))
+    n = len(A)
+    
+    # Inicializamos el pivote
+    pivot = 1.0
+
+    # Aplicamos el método de Montante
+    for k in range(n):
+        # Guardamos el pivote actual
+        pivot_k = Augmented[k, k]
+        
+        # Actualizamos toda la matriz
+        for i in range(n):
+            for j in range(n + 1):
+                if i != k and j != k:
+                    Augmented[i, j] = (pivot * Augmented[i, j] - Augmented[i, k] * Augmented[k, j]) / pivot_k
+        
+        # Actualizamos la fila pivote
+        for j in range(n + 1):
+            if j != k:
+                Augmented[k, j] = Augmented[k, j] / pivot_k
+        
+        # Actualizamos la columna pivote
+        for i in range(n):
+            if i != k:
+                Augmented[i, k] = 0
+        
+        # El nuevo pivote es 1
+        Augmented[k, k] = 1
+        pivot = pivot_k
+
+    # La solución está en la última columna
+    x = Augmented[:, -1]
+    return x
+
+def Jacobi(A, b, tol=1e-10, max_iter=100):
+    # Convertimos A y b a arrays de numpy
+    A = np.array(A, dtype=float)
+    b = np.array(b, dtype=float)
+    
+    # Dimensión del sistema
+    n = len(b)
+    
+    # Vector inicializado en ceros
+    x = np.zeros(n)
+    
+    # Iteración del método de Jacobi
+    for k in range(max_iter):
+        x_new = np.zeros_like(x)
+        for i in range(n):
+            suma = sum(A[i, j] * x[j] for j in range(n) if j != i)
+            x_new[i] = (b[i] - suma) / A[i, i]
+        
+        # Verificamos la tolerancia
+        if np.linalg.norm(x_new - x, ord=np.inf) < tol:
+            return x_new
+        
+        x = x_new  # Actualizamos el vector para la siguiente iteración
+    
+    raise ValueError("El método de Jacobi no convergió en el número máximo de iteraciones.")
+
+def GaussSeidel(A, b, tol=1e-10, max_iter=100):
+    # Convertimos A y b a arrays de numpy
+    A = np.array(A, dtype=float)
+    b = np.array(b, dtype=float)
+    
+    # Dimensión del sistema
+    n = len(b)
+    
+    # Vector inicializado en ceros
+    x = np.zeros(n)
+    
+    # Iteración del método de Gauss-Seidel
+    for k in range(max_iter):
+        x_new = x.copy()
+        for i in range(n):
+            suma = sum(A[i, j] * x_new[j] for j in range(i)) + sum(A[i, j] * x[j] for j in range(i + 1, n))
+            x_new[i] = (b[i] - suma) / A[i, i]
+        
+        # Verificamos la tolerancia
+        if np.linalg.norm(x_new - x, ord=np.inf) < tol:
+            return x_new
+        
+        x = x_new  # Actualizamos el vector para la siguiente iteración
+    
+    raise ValueError("El método de Gauss-Seidel no convergió en el número máximo de iteraciones.")
+
 # Métodos de ecuaciones no lineales
-def biseccion(f, a, b, tol=1e-5, max_iter=100):
-    if f(a) * f(b) > 0:
-        raise ValueError("f(a) y f(b) deben tener signos opuestos")
-    for _ in range(max_iter):
+# Método de Bisección
+def biseccion(f, a, b, tol, max_iter):
+    x = sp.symbols('x')
+    f = sp.sympify(f)
+    iter_count = 0
+    while iter_count < max_iter:
         c = (a + b) / 2
-        if abs(f(c)) < tol:
+        fc = f.subs(x, c)
+        print(f"Iteración {iter_count + 1}: c = {c}, f(c) = {fc}")
+        if abs(fc) < tol or abs(b - a) / 2 < tol:
             return c
-        elif f(c) * f(a) < 0:
+        if f.subs(x, a) * fc < 0:
             b = c
         else:
             a = c
+        iter_count += 1
     return c
 
-def newton_raphson(f, df, x0, tol=1e-5, max_iter=100):
-    x = x0
-    for _ in range(max_iter):
-        fx = f(x)
-        dfx = df(x)
-        if abs(fx) < tol:
-            return x
-        x = x - fx / dfx
-    return x
+# Método de Newton-Raphson
+def newton_raphson(f, x0, tol, max_iter):
+    x = sp.symbols('x')
+    f = sp.sympify(f)
+    df = sp.diff(f, x)  # Derivada de f
+    iter_count = 0
+    while iter_count < max_iter:
+        fx = f.subs(x, x0)
+        dfx = df.subs(x, x0)
+        if dfx == 0:
+            print("Derivada cero, no se puede continuar.")
+            return None
+        x1 = x0 - fx / dfx
+        print(f"Iteración {iter_count + 1}: x = {x1}")
+        if abs(x1 - x0) < tol:
+            return x1
+        x0 = x1
+        iter_count += 1
+    return x0
+
+# Método de Falsa Posición
+def falsa_posicion(f, a, b, tol, max_iter):
+    x = sp.symbols('x')
+    f = sp.sympify(f)
+    iter_count = 0
+    while iter_count < max_iter:
+        fa = f.subs(x, a)
+        fb = f.subs(x, b)
+        c = b - (fb * (b - a)) / (fb - fa)
+        fc = f.subs(x, c)
+        print(f"Iteración {iter_count + 1}: c = {c}, f(c) = {fc}")
+        if abs(fc) < tol or abs(b - a) < tol:
+            return c
+        if fa * fc < 0:
+            b = c
+        else:
+            a = c
+        iter_count += 1
+    return c
+
+# Método de Punto Fijo
+def punto_fijo(g, x0, tol, max_iter):
+    x = sp.symbols('x')
+    g = sp.sympify(g)
+    iter_count = 0
+    while iter_count < max_iter:
+        x1 = g.subs(x, x0)
+        print(f"Iteración {iter_count + 1}: x = {x1}")
+        if abs(x1 - x0) < tol:
+            return x1
+        x0 = x1
+        iter_count += 1
+    return x1
+
+# Método de Secante
+def secante(f, x0, x1, tol, max_iter):
+    x = sp.symbols('x')
+    f = sp.sympify(f)
+    iter_count = 0
+    while iter_count < max_iter:
+        fx0 = f.subs(x, x0)
+        fx1 = f.subs(x, x1)
+        x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        print(f"Iteración {iter_count + 1}: x = {x2}")
+        if abs(x2 - x1) < tol:
+            return x2
+        x0, x1 = x1, x2
+        iter_count += 1
+    return x2
 
 #Metodos de EDO
-def runge_kutta_4(func, x0, y0, x_final, h):
+def euler(func, x0, y0, x_final, h):
     x, y = x0, y0
     resultados = []
+    
+    # Mientras x esté dentro del intervalo, aplica el método de Euler
     while x <= x_final:
         resultados.append((x, y))
-        k1 = h * func(x, y)
-        k2 = h * func(x + h / 2, y + k1 / 2)
-        k3 = h * func(x + h / 2, y + k2 / 2)
-        k4 = h * func(x + h, y + k3)
-        y += (k1 + 2 * k2 + 2 * k3 + k4) / 6
-        x += h
-    return resultados
+        y += h * func(x, y)  # Aproximación de y
+        x += h  # Incrementa x
 
-def runge_kutta_3_8(func, x0, y0, x_final, h):
-    x, y = x0, y0
-    resultados = []
-    while x <= x_final:
-        resultados.append((x, y))
-        k1 = h * func(x, y)
-        k2 = h * func(x + h / 3, y + k1 / 3)
-        k3 = h * func(x + 2 * h / 3, y - k1 / 3 + k2)
-        k4 = h * func(x + h, y + k1 - k2 + k3)
-        y += (k1 + 3 * k2 + 3 * k3 + k4) / 8
-        x += h
-    return resultados
-
-def runge_kutta_1_3(func, x0, y0, x_final, h):
-    x, y = x0, y0
-    resultados = []
-    while x <= x_final:
-        resultados.append((x, y))
-        k1 = h * func(x, y)
-        k2 = h * func(x + h / 2, y + k1 / 2)
-        k3 = h * func(x + h, y - k1 + 2 * k2)
-        y += (k1 + 4 * k2 + k3) / 6
-        x += h
-    return resultados
+    return resultados  # Retorna la lista de resultados (pares (x, y))
 
 def runge_kutta_2(func, x0, y0, x_final, h):
     x, y = x0, y0
@@ -451,6 +584,12 @@ def calcular():
                 resultado = gauss_jordan(A, b)
             elif metodo_lineal_var.get() == "Eliminación Gauss":
                 resultado = gauss_eliminacion(A, b)
+            elif metodo_lineal_var.get() == "Montante":
+                resultado = Montante(A,b)
+            elif metodo_lineal_var.get() == "Gauss-seidei":
+                resultado = GaussSeidel(A,b)
+            elif metodo_lineal_var.get() == "Jacobi":
+                resultado = Jacobi(A,b)
             else:
                 messagebox.showerror("Error", "Selecciona un método lineal válido.")
             
@@ -469,32 +608,82 @@ def calcular():
                 resultado = runge_kutta_2(func, x0, y0, x_final, h)
             elif metodo_EDO_var.get() == "Runge-Kutta 3er Orden":
                 resultado = runge_kutta_3(func, x0, y0, x_final, h)
-            elif metodo_EDO_var.get() == "Runge-Kutta 4to Orden":
-                resultado = runge_kutta_4(func, x0, y0, x_final, h)
-            elif metodo_EDO_var.get() == "Runge-Kutta 3/8 Simpson":
-                resultado = runge_kutta_3_8(func, x0, y0, x_final, h)
-            elif metodo_EDO_var.get() == "Runge-Kutta 1/3 Simpson":
-                resultado = runge_kutta_1_3(func, x0, y0, x_final, h)
+            elif metodo_EDO_var.get() == "Euler":
+                resultado =euler(func, x0, y0, x_final, h)
             else:
               messagebox.showerror("Error", "Selecciona un método de EDO válido.")
               
               messagebox.showinfo("Resultado", f"Resultados: {resultado}")
             
         elif metodo_var.get() == "no_lineal":
-            func_str = f_entry.get()
+            func_str = f_entry.get()  # La función se toma como input
+            tol = float(tol_entry.get())  # Tolerancia
+            max_iter = int(max_iter_entry.get())  # Número máximo de iteraciones
             f = lambda x: eval(func_str)  # Convertir la expresión en función
-            df_str = df_entry.get()
-            df = lambda x: eval(df_str)
-            x0 = float(x0_entry.get())
-            
-            if metodo_no_lineal_var.get() == "Bisectriz":
-                resultado = biseccion(f, -10, 10)  # Intervalo de ejemplo
+
+            if metodo_no_lineal_var.get() == "Bisección":
+               a = float(a_entry.get())  # Límite inferior
+               b = float(b_entry.get())  # Límite superior
+               resultado = biseccion(f, a, b, tol, max_iter)
+               messagebox.showinfo("Resultado", f"Raíz encontrada por Bisección: {resultado}")
+
             elif metodo_no_lineal_var.get() == "Newton-Raphson":
-                resultado = newton_raphson(f, df, x0)
+                x0 = float(x0_entry.get())  # Valor inicial
+                resultado = newton_raphson(f, x0, tol, max_iter)
+                messagebox.showinfo("Resultado", f"Raíz encontrada por Newton-Raphson: {resultado}")
+
+            elif metodo_no_lineal_var.get() == "Falsa Posición":
+                a = float(a_entry.get())  # Límite inferior
+                b = float(b_entry.get())  # Límite superior
+                resultado = falsa_posicion(f, a, b, tol, max_iter)
+                messagebox.showinfo("Resultado", f"Raíz encontrada por Falsa Posición: {resultado}")
+
+            elif metodo_no_lineal_var.get() == "Punto Fijo":
+                g_str = g_entry.get()  # La función g(x) para el método de punto fijo
+                g = lambda x: eval(g_str)
+                x0 = float(x0_entry.get())  # Valor inicial
+                resultado = punto_fijo(g, x0, tol, max_iter)
+                messagebox.showinfo("Resultado", f"Raíz encontrada por Punto Fijo: {resultado}")
+
+            elif metodo_no_lineal_var.get() == "Secante":
+                x0 = float(x0_entry.get())  # Primer valor inicial
+                x1 = float(x1_entry.get())  # Segundo valor inicial
+                resultado = secante(f, x0, x1, tol, max_iter)
+                messagebox.showinfo("Resultado", f"Raíz encontrada por Secante: {resultado}")
+
             else:
                 messagebox.showerror("Error", "Selecciona un método no lineal válido.")
-            
-            messagebox.showinfo("Resultado", f"Raíz encontrada: {resultado}")
+        
+        elif metodo_var.get() == "Integracion":
+            funcion = funcion_entry.get()  # La función se toma como input
+            a = float(limite_inferior_entry.get())  # Límite inferior
+            b = float(limite_superior_entry.get())  # Límite superior
+            n = float(subintervalos_entry.get())  # Número de subintervalos
+
+            if metodo_integracion_var == "Regla Trapezoidal":
+               resultado = regla_trapezoidal(funcion, a, b, n)
+               resultado = f"Resultado de la integral por la Regla trapezoidal: {resultado}"
+
+            elif metodo_integracion_var == "Regla de 1/3 Simpson":
+                resultado = simpson_tercio(funcion, a, b, n)
+                resultado = f"Resultado de la integral por Simpson 1/3: {resultado}"
+
+            elif metodo_integracion_var == "Regla de 3/8 Simpson":
+                resultado = simpson_octavos(funcion, a, b, n)
+                resultado = f"Resultado de la integral por Simpson 3/8: {resultado}"
+
+            elif metodo_integracion_var == "Newton-Cotes Cerradas":
+                resultado = newton_cotes_cerradas(funcion, a, b, n)
+                resultado = f"Resultado de la integral por Newton-Cotes Cerradas: {resultado}"
+
+            elif metodo_integracion_var == "Newton-Cotes Abiertas":
+                resultado = newton_cotes_abiertas(funcion, a, b, n)
+                resultado = f"Resultado de la integral por Newton-Cotes Abiertas: {resultado}"
+
+            else:
+                 messagebox.showerror("Error", "Selecciona un método válido de integración numérica.")
+            return
+
 
         elif metodo_var.get() == "MinimosCuadrados":
             x = list(map(float, x_entry.get().split()))
@@ -523,32 +712,11 @@ def calcular():
             else:
                 messagebox.showerror("Error", "Selecciona un método válido de mínimos cuadrados.")
                 return
+            
 
             messagebox.showinfo("Resultado", f"Resultado: {resultado}")
-        
-        elif n <= 0:
-            funcion = funcion_entry.get()
-            a = float(limite_inferior_entry.get())
-            b = float(limite_superior_entry.get())
-            n = int(subintervalos_entry.get())
-            metodo = metodo_integracion_var.get()
-            raise ValueError("El número de subintervalos debe ser mayor que cero.")
+            
 
-            # Realizar cálculo según el método seleccionado
-            if metodo == "Regla Trapezoidal":
-                resultado = regla_trapezoidal(funcion, a, b, n)
-            elif metodo == "Regla de 1/3 Simpson":
-                resultado = simpson_tercio(funcion, a, b, n)
-            elif metodo == "Regla de 3/8 Simpson":
-                resultado = simpson_octavos(funcion, a, b, n)
-            elif metodo == "Newton – Cotes Cerradas":
-                resultado = newton_cotes_cerradas(funcion, a, b, n)
-            elif metodo == "Newton – Cotes Abiertas":
-                resultado = newton_cotes_abiertas(funcion, a, b, n)
-            else:
-                resultado = "Método no reconocido."
-
-            messagebox.showinfo("Resultado", f"Resultado de la integración: {resultado}")
                     
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {str(e)}")
@@ -592,17 +760,41 @@ def cambiar_menu(tipo):
         A_entry.pack()
         tk.Label(root, text="Vector b (separado por espacios):").pack()
         b_entry.pack()
-        
+
     elif tipo == "no_lineal":
         # Ecuaciones No Lineales
         tk.Label(root, text="Selecciona el método de ecuaciones no lineales:").pack()
-        no_lineal_menu.pack()
+        no_lineal_menu.pack()  # Menu para seleccionar el método (Bisección, Newton-Raphson, etc.)
+        # Entrada de la función f(x)
         tk.Label(root, text="Función f(x) (por ejemplo, x**2 - 2):").pack()
         f_entry.pack()
+        # Entrada de la derivada f'(x) (solo para Newton-Raphson)
         tk.Label(root, text="Derivada f'(x) (para Newton-Raphson):").pack()
         df_entry.pack()
+
+        # Entrada para el valor inicial x0
         tk.Label(root, text="Valor inicial x0:").pack()
         x0_entry.pack()
+
+        # Entrada para el límite inferior (solo necesario para algunos métodos, como Bisección y Falsa Posición)
+        tk.Label(root, text="Límite inferior (a) para Bisección/Falsa Posición:").pack()
+        a_entry.pack()
+
+        # Entrada para el límite superior (solo necesario para algunos métodos, como Bisección y Falsa Posición)
+        tk.Label(root, text="Límite superior (b) para Bisección/Falsa Posición:").pack()
+        b_entry.pack()
+
+        # Entrada para la tolerancia
+        tk.Label(root, text="Tolerancia:").pack()
+        tol_entry.pack()
+
+        # Entrada para el número máximo de iteraciones
+        tk.Label(root, text="Número máximo de iteraciones:").pack()
+        max_iter_entry.pack()
+
+        # Botón para ejecutar el cálculo
+        calcular_button = tk.Button(root, text="Calcular", command=calcular)  # Asegúrate de que la función `calcular` esté adaptada
+        calcular_button.pack()
 
     elif tipo == "EDO":
         tk.Label(root, text="Selecciona el método de ecuaciones diferenciales:").pack()
@@ -621,9 +813,10 @@ def cambiar_menu(tipo):
         h_entry.pack()
 
 
-    elif tipo == "Integración":
+    elif tipo == "Integracion":
         # Selección del método de integración
         tk.Label(root, text="Selecciona el método de integración:").pack()
+        metodo_integracion_menu.pack()
         # Solicitar función a integrar
         tk.Label(root, text="Función a integrar (en términos de x):").pack()
         funcion_entry = tk.Entry(root)
@@ -645,9 +838,10 @@ def cambiar_menu(tipo):
 
 
 
-    elif tipo == "Minimos cuadrados":
+    elif tipo == "MinimosCuadrados":
         # Selección del tipo de ajuste
         tk.Label(root, text="Selecciona el tipo de ajuste:").pack()
+        MinimosCuadrados_menu.pack()
         # Solicitar puntos x
         tk.Label(root, text="Puntos x (separados por espacios):").pack()
         x_minimos_entry = tk.Entry(root)
@@ -677,51 +871,21 @@ EDO_menu = tk.OptionMenu(root, metodo_EDO_var,
                          "Euler Modificado",
                          "Runge-Kutta 2do Orden",
                          "Runge-Kutta 3er Orden",
-                         "Runge-Kutta 4to Orden",
-                         "Runge-Kutta 3/8 Simpson",
-                         "Runge-Kutta 1/3 Simpson")
-
-# Opciones de interpolación
-metodo_interpolacion_var = tk.StringVar(value="Lineal")
-interpolacion_menu = tk.OptionMenu(root, metodo_interpolacion_var, "Lineal", "Lagrange", "Newton Atras", "Newton Adelante", "Newton con diferencias divididas")
-
-# Opciones de ecuaciones lineales
-metodo_lineal_var = tk.StringVar(value="Gauss-Jordan")
-lineal_menu = tk.OptionMenu(root, metodo_lineal_var, "Gauss-Jordan", "Eliminación Gauss","Montante","Jacobi","Gauss-seidei")
-
-# Opciones de ecuaciones no lineales
-metodo_no_lineal_var = tk.StringVar(value="Bisección")
-no_lineal_menu = tk.OptionMenu(root, metodo_no_lineal_var, "Bisectriz", "Newton-Raphson","Falsa-Posicion","Punto-Fijo","Secante")
-
-# Opciones de EDO
-metodo_EDO_var = tk.StringVar(value="Euler Modificado")
-EDO_menu = tk.OptionMenu(root, metodo_EDO_var,
-                         "Euler Modificado",
-                         "Runge-Kutta 2do Orden",
-                         "Runge-Kutta 3er Orden",
-                         "Runge-Kutta 4to Orden",
-                         "Runge-Kutta 3/8 Simpson",
-                         "Runge-Kutta 1/3 Simpson")
+                         "Euler")
 
 #Opciones Integracion
 metodo_integracion_var = tk.StringVar(value="Regla Trapezoidal")  # Valor por defecto
-metodo_integracion_menu = tk.OptionMenu(
-    root,
-    metodo_integracion_var,
+metodo_integracion_menu = tk.OptionMenu(root,metodo_integracion_var,
     "Regla Trapezoidal",
     "Regla de 1/3 Simpson",
     "Regla de 3/8 Simpson",
-    "Newton – Cotes Cerradas",
-    "Newton – Cotes Abiertas"
+    "Newton-Cotes Cerradas",
+    "Newton-Cotes Abiertas"
     )
 
 # Opciones MinimosCuadrados
 metodo_MinimosCuadrados_var = tk.StringVar(value="Línea Recta")  # Valor por defecto
-
-# Menú desplegable con todas las opciones
-MinimosCuadrados_menu = tk.OptionMenu(
-    root,
-    metodo_MinimosCuadrados_var,
+MinimosCuadrados_menu = tk.OptionMenu(root,metodo_MinimosCuadrados_var,
     "Línea Recta",             # Ajuste lineal
     "Cuadrática",              # Ajuste polinómico de grado 2
     "Cúbica",                  # Ajuste polinómico de grado 3
@@ -743,9 +907,14 @@ y0_entry = tk.Entry(root)
 x_final_entry = tk.Entry(root)
 h_entry = tk.Entry(root)
 funcion_entry = tk.Entry(root)
-limite_inferior_entry = tk.Entry
-limite_superior_entry = tk.Entry
-subintervalos_entry = tk.Entry
+limite_inferior_entry = tk.Entry(root)
+limite_superior_entry = tk.Entry(root)
+subintervalos_entry = tk.Entry(root)
+a_entry = tk.Entry(root)
+tol_entry = tk.Entry(root)
+max_iter_entry = tk.Entry(root)
+x1_entry = 0
+g_entry = 0
 calc_button = tk.Button(root, text="Calcular", command=calcular)
 
 # Iniciar la interfaz gráfica
