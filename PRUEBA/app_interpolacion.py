@@ -37,11 +37,12 @@ def interpolacion_lineal(x, y, valor):
     # Separar nuevamente las listas x e y ordenadas
     x_ordenado, y_ordenado = zip(*coordenadas)
     
+  
     # Realizar interpolación lineal
     for i in range(len(x_ordenado) - 1):
         if x_ordenado[i] <= valor <= x_ordenado[i+1]:
             return y_ordenado[i] + (y_ordenado[i+1] - y_ordenado[i]) * (valor - x_ordenado[i]) / (x_ordenado[i+1] - x_ordenado[i])
-    
+              
     # Si no se encuentra el intervalo, retornar None
     return None
 
