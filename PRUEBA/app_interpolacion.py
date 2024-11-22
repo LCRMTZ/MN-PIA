@@ -63,7 +63,7 @@ def interpolacion_lagrange(x, y, valor):
     polinomio = lagrange(x, y)
     return polinomio(valor)
 
-# Newton Adelante
+#Newton hacia adelante
 def newton_adelante(x, y, valor):
     # Validar que x y y tienen más de un valor
     if len(x) <= 1 or len(y) <= 1:
@@ -107,17 +107,23 @@ def newton_atras(x, y, valor):
     
     n = len(x)
     diferencias = [y[:]]
+    
+    # Construir tabla de diferencias divididas hacia atrás
     for i in range(1, n):
         diferencias.append([
-            (diferencias[i-1][j] - diferencias[i-1][j-1]) / (x[j] - x[j-i])
+            (diferencias[i-1][j] - diferencias[i-1][j-1]) / (x[j] - x[j-(i+1)])
             for j in range(i, n)
         ])
+    
+    # Evaluar el polinomio en el valor deseado
     resultado = diferencias[0][-1]
     prod = 1
     for i in range(1, n):
         prod *= (valor - x[-i])
         resultado += prod * diferencias[i][-1]
+    
     return resultado
+
 
 def newton_diferencias_divididas(x, y, valor):
     # Validar que x y y tienen más de un valor
@@ -565,7 +571,7 @@ def calcular():
             if metodo_interpolacion_var.get() == "Lineal":
                 resultado = interpolacion_lineal(x, y, x_nuevo)
             elif metodo_interpolacion_var.get() == "Lagrange":
-                resultado = lagrange(x, y, x_nuevo)
+                resultado = interpolacion_lagrange(x, y, x_nuevo)
             elif metodo_interpolacion_var.get() == "Newton Adelante":
                 resultado = newton_adelante(x, y, x_nuevo)
             elif metodo_interpolacion_var.get() == "Newton Atras":
@@ -737,10 +743,11 @@ def cambiar_menu(tipo):
     # Ocultar todos los campos
     for widget in root.winfo_children():
         widget.pack_forget()
-    
+
+    # Menú principal
     tk.Label(root, text="Selecciona el tipo de problema:").pack()
     metodo_menu.pack()
-    
+
     if tipo == "interpolacion":
         # Interpolación
         tk.Label(root, text="Selecciona el método de interpolación:").pack()
@@ -751,7 +758,7 @@ def cambiar_menu(tipo):
         y_entry.pack()
         tk.Label(root, text="Nuevo valor de x:").pack()
         x_nuevo_entry.pack()
-        
+
     elif tipo == "lineal":
         # Ecuaciones Lineales
         tk.Label(root, text="Selecciona el método de ecuaciones lineales:").pack()
@@ -764,43 +771,26 @@ def cambiar_menu(tipo):
     elif tipo == "no_lineal":
         # Ecuaciones No Lineales
         tk.Label(root, text="Selecciona el método de ecuaciones no lineales:").pack()
-        no_lineal_menu.pack()  # Menu para seleccionar el método (Bisección, Newton-Raphson, etc.)
-        # Entrada de la función f(x)
+        no_lineal_menu.pack()
         tk.Label(root, text="Función f(x) (por ejemplo, x**2 - 2):").pack()
         f_entry.pack()
-        # Entrada de la derivada f'(x) (solo para Newton-Raphson)
         tk.Label(root, text="Derivada f'(x) (para Newton-Raphson):").pack()
         df_entry.pack()
-
-        # Entrada para el valor inicial x0
         tk.Label(root, text="Valor inicial x0:").pack()
         x0_entry.pack()
-
-        # Entrada para el límite inferior (solo necesario para algunos métodos, como Bisección y Falsa Posición)
         tk.Label(root, text="Límite inferior (a) para Bisección/Falsa Posición:").pack()
         a_entry.pack()
-
-        # Entrada para el límite superior (solo necesario para algunos métodos, como Bisección y Falsa Posición)
         tk.Label(root, text="Límite superior (b) para Bisección/Falsa Posición:").pack()
         b_entry.pack()
-
-        # Entrada para la tolerancia
         tk.Label(root, text="Tolerancia:").pack()
         tol_entry.pack()
-
-        # Entrada para el número máximo de iteraciones
         tk.Label(root, text="Número máximo de iteraciones:").pack()
         max_iter_entry.pack()
 
-        # Botón para ejecutar el cálculo
-        calcular_button = tk.Button(root, text="Calcular", command=calcular)  # Asegúrate de que la función `calcular` esté adaptada
-        calcular_button.pack()
-
     elif tipo == "EDO":
+        # Ecuaciones Diferenciales Ordinarias (EDO)
         tk.Label(root, text="Selecciona el método de ecuaciones diferenciales:").pack()
         EDO_menu.pack()
-
-        # Campos para ingresar la función, valores iniciales y parámetros
         tk.Label(root, text="Función f(x, y):").pack()
         f_entry.pack()
         tk.Label(root, text="Valor inicial x0:").pack()
@@ -812,31 +802,18 @@ def cambiar_menu(tipo):
         tk.Label(root, text="Paso h:").pack()
         h_entry.pack()
 
-
     elif tipo == "Integracion":
-        # Selección del método de integración
+        # Integración Numérica
         tk.Label(root, text="Selecciona el método de integración:").pack()
         metodo_integracion_menu.pack()
-        # Solicitar función a integrar
         tk.Label(root, text="Función a integrar (en términos de x):").pack()
-        funcion_entry = tk.Entry(root)
         funcion_entry.pack()
-
-        # Solicitar límites de integración
         tk.Label(root, text="Límite inferior (a):").pack()
-        limite_inferior_entry = tk.Entry(root)
         limite_inferior_entry.pack()
-
         tk.Label(root, text="Límite superior (b):").pack()
-        limite_superior_entry = tk.Entry(root)
         limite_superior_entry.pack()
-
-        # Solicitar número de subintervalos
         tk.Label(root, text="Número de subintervalos (n):").pack()
-        subintervalos_entry = tk.Entry(root)
         subintervalos_entry.pack()
-
-
 
     elif tipo == "MinimosCuadrados":
         # Selección del tipo de ajuste
