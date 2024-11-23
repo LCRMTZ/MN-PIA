@@ -380,46 +380,51 @@ def euler(func, x0, y0, x_final, h):
     x, y = x0, y0
     resultados = []
     
-    # Mientras x esté dentro del intervalo, aplica el método de Euler
     while x <= x_final:
-        resultados.append((x, y))
-        y += h * func(x, y)  # Aproximación de y
-        x += h  # Incrementa x
+        resultados.append(f"x = {x:.4f}, y = {y:.4f}")
+        y += h * func(x, y)
+        x += h
 
-    return resultados  # Retorna la lista de resultados (pares (x, y))
+    return resultados  # Retorna los resultados formateados como cadenas
+
 
 def runge_kutta_2(func, x0, y0, x_final, h):
     x, y = x0, y0
     resultados = []
+    
     while x <= x_final:
-        resultados.append((x, y))
+        resultados.append(f"x = {x:.4f}, y = {y:.4f}")
         k1 = h * func(x, y)
         k2 = h * func(x + h, y + k1)
         y += (k1 + k2) / 2
         x += h
-    return resultados
+
+    return resultados  # Retorna los resultados formateados como cadenas
+
 
 def runge_kutta_3(func, x0, y0, x_final, h):
     x, y = x0, y0
     resultados = []
+    
     while x <= x_final:
-        resultados.append((x, y))
+        resultados.append(f"x = {x:.4f}, y = {y:.4f}")
         k1 = h * func(x, y)
         k2 = h * func(x + h / 2, y + k1 / 2)
         k3 = h * func(x + h, y - k1 + 2 * k2)
         y += (k1 + 4 * k2 + k3) / 6
         x += h
-    return resultados
+
+    return resultados  # Retorna los resultados formateados como cadenas
 
 def euler_modificado(func, x0, y0, x_final, h):
     x, y = x0, y0
     resultados = []
     while x <= x_final:
-        resultados.append((x, y))
+        resultados.append(f"x = {x:.4f}, y = {y:.4f}")
         y_predict = y + h * func(x, y)
         y = y + h / 2 * (func(x, y) + func(x + h, y_predict))
         x += h
-    return resultados
+    return resultados  # Retorna los resultados formateados como cadenas
 
 #Metodos de integracion
 def regla_trapezoidal(funcion, a, b, n):
@@ -611,16 +616,23 @@ def calcular():
             h = float(h_entry.get())
             if metodo_EDO_var.get() == "Euler Modificado":
                 resultado = euler_modificado(func, x0, y0, x_final, h)
+                for i, resultado in enumerate(resultado):
+                    messagebox.showinfo("Resultado", f"Resultados de x{i + 1}, y{i + 1}:\n{resultado}")
             elif metodo_EDO_var.get() == "Runge-Kutta 2do Orden":
                 resultado = runge_kutta_2(func, x0, y0, x_final, h)
+                for i, resultado in enumerate(resultado):
+                    messagebox.showinfo("Resultado", f"Resultados de x{i + 1}, y{i + 1}:\n{resultado}")
             elif metodo_EDO_var.get() == "Runge-Kutta 3er Orden":
                 resultado = runge_kutta_3(func, x0, y0, x_final, h)
+                for i, resultado in enumerate(resultado):
+                    messagebox.showinfo("Resultado", f"Resultados de x{i + 1}, y{i + 1}:\n{resultado}")
             elif metodo_EDO_var.get() == "Euler":
                 resultado =euler(func, x0, y0, x_final, h)
+                for i, resultado in enumerate(resultado):
+                    messagebox.showinfo("Resultado", f"Resultados de x{i + 1}, y{i + 1}:\n{resultado}")
             else:
               messagebox.showerror("Error", "Selecciona un método de EDO válido.")
               
-              messagebox.showinfo("Resultado", f"Resultados: {resultado}")
             
         elif metodo_var.get() == "no_lineal":
             func_str = f_entry.get()  # La función se toma como input
