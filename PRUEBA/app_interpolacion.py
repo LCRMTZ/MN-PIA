@@ -428,109 +428,104 @@ def euler_modificado(func, x0, y0, x_final, h):
 
 #Metodos de integracion
 def regla_trapezoidal(funcion, a, b, n):
-    # Convertir la función en un objeto de Python (usando eval, para simplificación)
+    """
+    Calcula la integral utilizando la regla trapezoidal.
+    """
     f = lambda x: eval(funcion)
-
-    # Calcular el tamaño de cada subintervalo
+    n = int(n)
     h = (b - a) / n
-
-    # Aproximación inicial (suma de los extremos)
     suma = (f(a) + f(b)) / 2.0
 
-    # Sumar las evaluaciones intermedias
     for i in range(1, n):
         x = a + i * h
         suma += f(x)
 
-    # Multiplicar por el tamaño del intervalo
     integral = h * suma
-    return integral
+    resultado = f"Resultado de la integral por la regla trapezoidal: {integral:.6f}"
+    return resultado
+
 
 def simpson_tercio(funcion, a, b, n):
-    # Convertir la función en un objeto de Python
+    """
+    Calcula la integral utilizando la regla de Simpson 1/3.
+    """
     f = lambda x: eval(funcion)
-
-    # Verificar que el número de subintervalos sea par
+    n = int(n)
     if n % 2 == 1:
-        n += 1  # Si es impar, hacer el número de subintervalos par
-
-    # Calcular el tamaño de cada subintervalo
+        n += 1
     h = (b - a) / n
-
-    # Aproximación inicial
     suma = f(a) + f(b)
 
-    # Sumar las evaluaciones de los puntos impares y pares
     for i in range(1, n, 2):
         suma += 4 * f(a + i * h)
-    for i in range(2, n-1, 2):
+    for i in range(2, n, 2):
         suma += 2 * f(a + i * h)
 
-    # Multiplicar por h/3
     integral = h / 3 * suma
-    return integral
+    resultado = f"Resultado de la integral por la regla de Simpson 1/3: {integral:.6f}"
+    return resultado
+
 
 def simpson_octavos(funcion, a, b, n):
-    # Convertir la función en un objeto de Python
+    """
+    Calcula la integral utilizando la regla de Simpson 3/8.
+    """
     f = lambda x: eval(funcion)
-
-    # Verificar que el número de subintervalos sea múltiplo de 3
+    n = int(n)
     if n % 3 != 0:
-        n += 3 - (n % 3)  # Ajustar para que sea múltiplo de 3
-
-    # Calcular el tamaño de cada subintervalo
+        n += 3 - (n % 3)
     h = (b - a) / n
-
-    # Aproximación inicial
     suma = f(a) + f(b)
 
-    # Sumar las evaluaciones de los puntos
     for i in range(1, n, 3):
         suma += 3 * f(a + i * h)
-    for i in range(2, n-1, 3):
+    for i in range(2, n, 3):
         suma += 3 * f(a + i * h)
-    for i in range(3, n-1, 3):
+    for i in range(3, n, 3):
         suma += 2 * f(a + i * h)
 
-    # Multiplicar por 3h/8
     integral = 3 * h / 8 * suma
-    return integral
+    resultado = f"Resultado de la integral por la regla de Simpson 3/8: {integral:.6f}"
+    return resultado
+
 
 def newton_cotes_cerradas(funcion, a, b, n):
-    # Convertir la función en un objeto de Python
+    """
+    Calcula la integral utilizando Newton-Cotes cerradas.
+    """
     f = lambda x: eval(funcion)
-
-    # Usar la fórmula de Newton-Cotes cerrada (generalizada)
-    # Se necesita una fórmula específica para el valor de n (n puntos)
-
+    n = int(n)
     h = (b - a) / n
     suma = 0
 
     for i in range(n + 1):
-        coef = 1  # Esto cambiaría dependiendo de los coeficientes para cada n (simplificado aquí)
+        coef = 1  # Placeholder for actual coefficients
         x = a + i * h
         suma += coef * f(x)
 
-    integral = h * suma  # Ajustar según los coeficientes de la fórmula
-    return integral
+    integral = h * suma
+    resultado = f"Resultado de la integral por Newton-Cotes cerradas: {integral:.6f}"
+    return resultado
+
 
 def newton_cotes_abiertas(funcion, a, b, n):
-    # Convertir la función en un objeto de Python
+    """
+    Calcula la integral utilizando Newton-Cotes abiertas.
+    """
     f = lambda x: eval(funcion)
-
-    # Aquí necesitaríamos un procedimiento específico para los métodos de Newton-Cotes abiertos
-    # Se utiliza una fórmula general de Newton-Cotes para puntos internos del intervalo.
-
-    h = (b - a) / (n + 1)  # Ajustado para los puntos internos
+    n = int(n)
+    h = (b - a) / (n + 1)
     suma = 0
 
     for i in range(1, n + 1):
-        coef = 1  # Esto también cambiaría dependiendo del número de puntos (simplificado aquí)
+        coef = 1  # Placeholder for actual coefficients
         x = a + i * h
         suma += coef * f(x)
 
-    integral = h * suma  # Ajuste según los coeficientes
-    return integral
+    integral = h * suma
+    resultado = f"Resultado de la integral por Newton-Cotes abiertas: {integral:.6f}"
+    return resultado
+
 
 #Minimos Cuadrados
 # Línea Recta
@@ -679,29 +674,31 @@ def calcular():
             b = float(limite_superior_entry.get())  # Límite superior
             n = float(subintervalos_entry.get())  # Número de subintervalos
 
-            if metodo_integracion_var == "Regla Trapezoidal":
+            if metodo_integracion_var.get() == "Regla Trapezoidal":
                resultado = regla_trapezoidal(funcion, a, b, n)
-               resultado = f"Resultado de la integral por la Regla trapezoidal: {resultado}"
+               messagebox.showinfo("Resultado", f"{resultado}")
 
-            elif metodo_integracion_var == "Regla de 1/3 Simpson":
+            elif metodo_integracion_var.get() == "Regla de 1/3 Simpson":
                 resultado = simpson_tercio(funcion, a, b, n)
-                resultado = f"Resultado de la integral por Simpson 1/3: {resultado}"
+                messagebox.showinfo("Resultado", f"{resultado}")
 
-            elif metodo_integracion_var == "Regla de 3/8 Simpson":
+            elif metodo_integracion_var.get() == "Regla de 3/8 Simpson":
                 resultado = simpson_octavos(funcion, a, b, n)
-                resultado = f"Resultado de la integral por Simpson 3/8: {resultado}"
+                messagebox.showinfo("Resultado", f"{resultado}")
 
-            elif metodo_integracion_var == "Newton-Cotes Cerradas":
+            elif metodo_integracion_var.get() == "Newton-Cotes Cerradas":
                 resultado = newton_cotes_cerradas(funcion, a, b, n)
-                resultado = f"Resultado de la integral por Newton-Cotes Cerradas: {resultado}"
+                messagebox.showinfo("Resultado", f"{resultado}")
 
-            elif metodo_integracion_var == "Newton-Cotes Abiertas":
+            elif metodo_integracion_var.get() == "Newton-Cotes Abiertas":
                 resultado = newton_cotes_abiertas(funcion, a, b, n)
-                resultado = f"Resultado de la integral por Newton-Cotes Abiertas: {resultado}"
+                messagebox.showinfo("Resultado", f"{resultado}")
 
             else:
                  messagebox.showerror("Error", "Selecciona un método válido de integración numérica.")
             return
+        
+        
 
 
         elif metodo_var.get() == "MinimosCuadrados":
