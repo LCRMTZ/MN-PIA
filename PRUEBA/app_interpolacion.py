@@ -705,26 +705,26 @@ def calcular():
 
 
         elif metodo_var.get() == "MinimosCuadrados":
-            x = list(map(float, x_entry.get().split()))
-            y = list(map(float, y_entry.get().split()))
+            x = list(map(float, x_minimos_entry.get().split()))
+            y = list(map(float, y_minimos_entry.get().split()))
 
-            if ajuste_linea_recta == "Línea Recta":
+            if metodo_MinimosCuadrados_var.get() == "Línea Recta":
                 m, c = ajuste_linea_recta(x, y)
-                resultado = f"Pendiente: {m}, Intersección: {c}"
+                resultado = f"Pendiente: {m}, Intersección: {c} res"
 
-            elif ajuste_cuadratico == "Cuadrática":
+            elif metodo_MinimosCuadrados_var.get() == "Cuadrática":
                 a, b, c = ajuste_cuadratico(x, y)
                 resultado = f"Coeficientes: a={a}, b={b}, c={c}"
 
-            elif ajuste_cubico == "Cúbica":
+            elif metodo_MinimosCuadrados_var.get() == "Cúbica":
                 a, b, c, d = ajuste_cubico(x, y)
                 resultado = f"Coeficientes: a={a}, b={b}, c={c}, d={d}"
 
-            elif ajuste_lineal_funcion == "Lineal con Función":
+            elif metodo_MinimosCuadrados_var.get() == "Lineal con Función":
                 m, c = ajuste_lineal_funcion(x, y)
                 resultado = f"Pendiente: {m}, Intersección (transformada): {c}"
 
-            elif ajuste_cuadratico_funcion == "Cuadrática con Función":
+            elif metodo_MinimosCuadrados_var.get() == "Cuadrática con Función":
                 coeficientes = ajuste_cuadratico_funcion(x, y)
                 resultado = f"Coeficientes (transformados): {coeficientes}"
 
@@ -834,11 +834,11 @@ def cambiar_menu(tipo):
         MinimosCuadrados_menu.pack()
         # Solicitar puntos x
         tk.Label(root, text="Puntos x (separados por espacios):").pack()
-        x_minimos_entry = tk.Entry(root)
+        # x_minimos_entry = tk.Entry(root)
         x_minimos_entry.pack()
         # Solicitar puntos y
         tk.Label(root, text="Puntos y (separados por espacios):").pack()
-        y_minimos_entry = tk.Entry(root)
+        # y_minimos_entry = tk.Entry(root)
         y_minimos_entry.pack()
     # Botón para calcular
     calc_button.pack()
@@ -886,6 +886,8 @@ MinimosCuadrados_menu = tk.OptionMenu(root,metodo_MinimosCuadrados_var,
 # Entradas y botón de cálculo
 x_entry = tk.Entry(root)
 y_entry = tk.Entry(root)
+x_minimos_entry = tk.Entry(root)
+y_minimos_entry = tk.Entry(root)
 x_nuevo_entry = tk.Entry(root)
 A_entry = tk.Entry(root)
 b_entry = tk.Entry(root)
