@@ -4,6 +4,23 @@ import numpy as np
 from scipy.interpolate import lagrange
 import sympy as sp
 
+def function_from_str(func_str):
+    """
+    Convierte una función definida como cadena en una función de Python evaluable.
+    Permite múltiples variables (e.g., x, y).
+    """
+    try:
+        # Detecta todas las variables en la función automáticamente
+        symbols = list(sp.sympify(func_str).free_symbols)
+        symbolic_func = sp.sympify(func_str)  # Convierte la cadena a una expresión simbólica
+        
+        # Convierte la función simbólica en una función de Python
+        python_func = sp.lambdify(symbols, symbolic_func, modules=["math"])
+        return python_func, symbols  # Devuelve la función y las variables involucradas
+    except Exception as e:
+        print(f"Error al analizar la función: {e}")
+        return None, None
+
 # Verificar si los intervalos son uniformes
 def intervalos_uniformes(valores):
     if len(valores) < 2:
@@ -610,8 +627,8 @@ def calcular():
             func_str = f_entry.get()  # La función se toma como input
             tol = float(tol_entry.get())  # Tolerancia
             max_iter = int(max_iter_entry.get())  # Número máximo de iteraciones
-            f = lambda x: eval(func_str)  # Convertir la expresión en función
-
+            # f = lambda x: eval(func_str)  # Convertir la expresión en función
+            f = func_str
             if metodo_no_lineal_var.get() == "Bisección":
                a = float(a_entry.get())  # Límite inferior
                b = float(b_entry.get())  # Límite superior
@@ -681,6 +698,11 @@ def calcular():
         elif metodo_var.get() == "MinimosCuadrados":
             x = list(map(float, x_minimos_entry.get().split()))
             y = list(map(float, y_minimos_entry.get().split()))
+            func = "valor dummie"
+            func_str = f_entry.get()
+            if func_str != "":
+                func = function_from_str(func_str)
+            
 
             if metodo_MinimosCuadrados_var.get() == "Línea Recta":
                 m, c = ajuste_linea_recta(x, y)
@@ -696,9 +718,15 @@ def calcular():
 
             elif metodo_MinimosCuadrados_var.get() == "Lineal con Función":
                 m, c = ajuste_lineal_funcion(x, y)
-                resultado = f"Pendiente: {m}, Intersección (transformada): {c}"
+                # creamos una lista de valores
+                # por cada uno de los valores de
+                    #sumamos m + (c * valor de x ene sta posicion)
+                # Creamos una lista de valores predichos
+                valores_predichos = [f"{c} + {m} * {xi} = {m * xi + c} " for xi in x]
 
-            elif metodo_MinimosCuadrados_var.get() == "Cuadrática con Función":
+                resultado = f"Pendiente: {m}, Intersección (transformada): {c} \n + valores predichos: {valores_predichos}"
+
+            elif metodo_MinimosCuadrados_var.get() == "Cuadrática con Función":               
                 coeficientes = ajuste_cuadratico_funcion(x, y)
                 resultado = f"Coeficientes (transformados): {coeficientes}"
 
@@ -825,7 +853,11 @@ def cambiar_menu(tipo):
         # Solicitar puntos y
         tk.Label(root, text="Puntos y (separados por espacios):").pack()
         # y_minimos_entry = tk.Entry(root)
-        y_minimos_entry.pack()
+        y_minimos_entry.pack()    
+        # Solicitar la funcion
+        tk.Label(root, text="Ingrese la funcion (solo si corresponde):").pack()
+        # mostrar input de funcion
+        f_entry.pack() 
     # Botón para calcular
     calc_button.pack()
 
