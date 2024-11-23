@@ -18,33 +18,13 @@ def intervalos_uniformes(valores):
 #         if x[i] <= valor <= x[i+1]:
 #             return y[i] + (y[i+1] - y[i]) * (valor - x[i]) / (x[i+1] - x[i])
 #     return None
-def interpolacion_lineal(x, y, valor):
-    # Validar que x y y tienen más de un valor
-    if len(x) <= 1 or len(y) <= 1:
-        raise ValueError("x e y deben contener más de un valor cada uno.")
-    
-    # Validar que x e y tienen la misma cantidad de valores
-    if len(x) != len(y):
-        raise ValueError("x e y deben tener la misma cantidad de valores.")
-    
-    # Validar que x no tiene valores repetidos
-    if len(set(x)) != len(x):
-        raise ValueError("x no debe contener valores repetidos.")
-    
-    # Convertir a una lista de coordenadas y ordenar por x
-    coordenadas = sorted(zip(x, y), key=lambda punto: punto[0])
-    
-    # Separar nuevamente las listas x e y ordenadas
-    x_ordenado, y_ordenado = zip(*coordenadas)
-    
-  
-    # Realizar interpolación lineal
-    for i in range(len(x_ordenado) - 1):
-        if x_ordenado[i] <= valor <= x_ordenado[i+1]:
-            return y_ordenado[i] + (y_ordenado[i+1] - y_ordenado[i]) * (valor - x_ordenado[i]) / (x_ordenado[i+1] - x_ordenado[i])
-              
-    # Si no se encuentra el intervalo, retornar None
-    return None
+def interpolacion_lineal(a,b,f_a,f_b,x_nuevo):
+    # Perform the linear interpolation calculation
+    interpolated_value = f_a + ((f_b - f_a) / (b - a)) * (x_nuevo - a)
+        # Store the result in a variable named `none`
+    resultado = interpolated_value
+    return resultado
+
 
 
 # Interpolación de Lagrange
@@ -94,37 +74,30 @@ def newton_adelante(x, y, valor):
 
 # Newton Atrás
 def newton_atras(x, y, valor):
-    # Validar que x y y tienen más de un valor
-    if len(x) <= 1 or len(y) <= 1:
-        raise ValueError("x e y deben contener más de un valor cada uno.")
-    
-    # Validar que x e y tienen la misma cantidad de valores
-    if len(x) != len(y):
-        raise ValueError("x e y deben tener la misma cantidad de valores.")
-    
-    # Validar que x no tiene valores repetidos
-    if len(set(x)) != len(x):
-        raise ValueError("x no debe contener valores repetidos.")
-    
-    n = len(x)
-    diferencias = [y[:]]
-    
-    # Construir tabla de diferencias divididas hacia atrás
-    for i in range(1, n):
-        diferencias.append([
-            (diferencias[i-1][j] - diferencias[i-1][j-1]) / (x[j] - x[j-(i+1)])
-            for j in range(i, n)
-        ])
-    
-    # Evaluar el polinomio en el valor deseado
-    resultado = diferencias[0][-1]
-    prod = 1
-    for i in range(1, n):
-        prod *= (valor - x[-i])
-        resultado += prod * diferencias[i][-1]
-    
-    return resultado
+    import math
 
+    n = len(x)
+    # Creating the backward difference table
+    diff_table = [[0 for _ in range(n)] for _ in range(n)]
+    for i in range(n):
+        diff_table[i][0] = y[i]
+
+    for j in range(1, n):
+        for i in range(n - 1, j - 1, -1):
+            diff_table[i][j] = diff_table[i][j - 1] - diff_table[i - 1][j - 1]
+
+    # Calculating u and initializing the result
+    h = x[1] - x[0]  # Assuming uniform spacing
+    u = (valor - x[-1]) / h
+    resultado = diff_table[-1][0]
+
+    # Calculating the interpolation value
+    u_term = 1
+    for i in range(1, n):
+        u_term *= (u + (i - 1))
+        resultado += (u_term * diff_table[-1][i]) / math.factorial(i)
+
+    return resultado
 
 def newton_diferencias_divididas(x, y, valor):
     # Validar que x y y tienen más de un valor
@@ -570,7 +543,11 @@ def calcular():
             x_nuevo = float(x_nuevo_entry.get())
             
             if metodo_interpolacion_var.get() == "Lineal":
-                resultado = interpolacion_lineal(x, y, x_nuevo)
+                a = float(a_entry.get())  # User input for a
+                b = float(b_entry.get())  # User input for b
+                f_a = float(f_a_entry.get())  # User input for f(a)
+                f_b = float(f_b_entry.get())  # User input for f(b)
+                resultado = interpolacion_lineal(a,b,f_a,f_b,x_nuevo)
             elif metodo_interpolacion_var.get() == "Lagrange":
                 resultado = interpolacion_lagrange(x, y, x_nuevo)
             elif metodo_interpolacion_var.get() == "Newton Adelante":
@@ -759,9 +736,21 @@ def cambiar_menu(tipo):
     metodo_menu.pack()
 
     if tipo == "interpolacion":
-        # Interpolación
+        #interpolaciones
         tk.Label(root, text="Selecciona el método de interpolación:").pack()
         interpolacion_menu.pack()
+        # Interpolaciónlineal
+        tk.Label(root, text="solo para interpolacion lineal")
+        tk.Label(root, text="Valor de a:").pack()
+        a_entry.pack()
+        tk.Label(root, text="Valor de b:").pack()
+        b_entry.pack()
+        tk.Label(root, text="Valor de f(a):").pack()
+        f_a_entry.pack()
+        tk.Label(root, text="Valor de f(b):").pack()
+        f_b_entry.pack()
+        #interpolacion 
+        tk.Label(root, text="Interpolaciones")
         tk.Label(root, text="Puntos x (separados por espacios):").pack()
         x_entry.pack()
         tk.Label(root, text="Puntos y (separados por espacios):").pack()
@@ -902,6 +891,8 @@ tol_entry = tk.Entry(root)
 max_iter_entry = tk.Entry(root)
 x1_entry = 0
 g_entry = 0
+f_a_entry =tk.Entry(root)
+f_b_entry = tk.Entry(root)
 calc_button = tk.Button(root, text="Calcular", command=calcular)
 
 # Iniciar la interfaz gráfica
